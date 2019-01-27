@@ -1,29 +1,39 @@
-const express = require('express');
+const express = require('express');;
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+const cookie = require('cookie-parser');
+const flash = require('connect-flash');
+const session = require('express-session');
+const passport = require('passport');
 const app = express();
+const keys = require('./config/auth');
+
+require('./models/User');
+
+require('./routes')(app);
+require('./config/passport');
+
+
+app.set('view engine', 'twig');
 
 app.use(express.static(__dirname));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}))
-const Message = mongoose.model('Message',{ name:String,message:String});
-const dbUrl = 'mongodb://<dbuser>:<dbpassword>@ds117158.mlab.com:17158/smsnew';
-app.get('/messages', (req, res) => {
-    Message.find({},(err, messages)=> {
-      res.send(messages);
-    })
-  });
-  app.post('/messages', (req, res) => {
-    var message = new Message(req.body);
-    message.save((err) =>{
-      if(err)
-        sendStatus(500);
-      res.sendStatus(200);
-    })
-  });
-mongoose.connect(dbUrl,(err) => {
-    console.log('mongodb connected',err);
-});
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(cookie('meghuchua'));
+app.use(session({
+  secret: 'meghuchua',
+  resave: true,
+  saveUninitialized: true
+}));
+app.use(flash());
+
+
+const dbUrl = 'mongodb://localhost/smsnew';
+
+
+
+mongoose.connect(dbUrl, { useNewUrlParser: true }
+);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT);
