@@ -9,16 +9,11 @@ const keys = require('./config/auth');
 
 require('./models/User');
 
-require('./routes')(app);
-require('./config/passport');
-
-
 app.set('view engine', 'twig');
 
 app.use(express.static(__dirname));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(cookie('meghuchua'));
 app.use(session({
   secret: 'meghuchua',
@@ -27,13 +22,26 @@ app.use(session({
 }));
 app.use(flash());
 
+require('./routes')(app);
+require('./config/passport');
+
+
+
+
 
 const dbUrl = 'mongodb://localhost/smsnew';
 
 
 
-mongoose.connect(dbUrl, { useNewUrlParser: true }
-);
+mongoose.connect(dbUrl, { useNewUrlParser: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(console.error);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT);
+app.listen(PORT, (err) => {
+  if (err) {
+    return console.error(err);
+  }
+
+  console.log(`Server started at port ${PORT}`);
+});
